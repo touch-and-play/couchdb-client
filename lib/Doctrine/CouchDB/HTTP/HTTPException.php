@@ -58,12 +58,18 @@ class HTTPException extends \Doctrine\CouchDB\CouchDBException
         $response = self::fixCloudantBulkCustomError($response);
 
         if (!isset($response->body['error'])) {
-            $response->body['error'] = '';
+        	if(is_integer($response->body)) {
+        		$error = $response->body;
+        		$response->body = array();
+        		$response->body['error'] = $error;
+        	} else {
+        		$response->body['error'] = '';
+        	}
         }
-
-        if (!isset($response->body['reason'])) {
-            $response->body['reason'] = '';
-        }
+		
+		if(!isset($response->body['reason'])) {
+			$response->body['reason'] = "unknown error";
+		}
 
         return new self(
             "HTTP Error with status " . $response->status . " occoured while "
